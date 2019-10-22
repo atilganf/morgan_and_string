@@ -20,8 +20,6 @@ function recursiveEqualFunc(rslt, a, b, x, y, old) {
       } else {
          let tempX = x;
          let tempY = y;
-         let fx = x;
-         let fy = x;
          //stops until a[tempX + 1] > a[tempX], it means a[tempX + 1] had to be bigger where it stops.
          while (a.charCodeAt(tempX) >= a.charCodeAt(tempX + 1) &&
             b.charCodeAt(tempY) >= b.charCodeAt(tempY + 1) &&
@@ -30,27 +28,36 @@ function recursiveEqualFunc(rslt, a, b, x, y, old) {
             tempY++;
          }
          let apDiffbp = a.charCodeAt(tempX + 1) - b.charCodeAt(tempY + 1);
-         if (a.charCodeAt(fx) < a.charCodeAt(tempX + 1)
-            && b.charCodeAt(fy) < b.charCodeAt(tempY + 1)) {
-            rslt += old + old;
-            rslt += a.slice(x, tempX + 1) + b.slice(y, tempY + 1);
-            x = tempX + 1;
-            y = tempY + 1;
-         } else {
-            if (apDiffbp === 0) {
-               old += a.slice(x, tempX + 1);
-               return recursiveEqualFunc(rslt, a, b, tempX + 1, tempY + 1, old);
-            } else if (apDiffbp > 0) {
-               rslt += old;
-               rslt += b.slice(y, tempY + 1);
-               y = tempY + 1;
-               x -= old.length;
-            } else {
-               rslt += old;
-               rslt += a.slice(x, tempX + 1);
-               x = tempX + 1;
-               y -= old.length;
+         if (apDiffbp === 0) {
+            //Getting next patterns numbers for deciding which result is better
+            let tempX2 = tempX + 1;
+            let tempY2 = tempY + 1;
+            while (a.charCodeAt(tempX2) >= a.charCodeAt(tempX2 + 1) &&
+               b.charCodeAt(tempY2) >= b.charCodeAt(tempY2 + 1) &&
+               a.charCodeAt(tempX2 + 1) === b.charCodeAt(tempY2 + 1)) {
+               tempX2++;
+               tempY2++;
             }
+            old += a.slice(x, tempX + 1);
+            let nextSeqLength = (tempX2 - tempX);
+            let lim = (old.length < nextSeqLength) ? old.length : nextSeqLength;
+            for (let i = 0; i < lim; i++) {
+               if (old.charAt(i) < a.charAt(tempX + 1 + i)) {
+                  rslt += old + old;
+                  return recursiveEqualFunc(rslt, a, b, tempX + 1, tempY + 1, "");
+               }
+            }
+            return recursiveEqualFunc(rslt, a, b, tempX + 1, tempY + 1, old);
+         } else if (apDiffbp > 0) {
+            rslt += old;
+            rslt += b.slice(y, tempY + 1);
+            y = tempY + 1;
+            x -= old.length;
+         } else {
+            rslt += old;
+            rslt += a.slice(x, tempX + 1);
+            x = tempX + 1;
+            y -= old.length;
          }
       }
    }
@@ -69,7 +76,6 @@ function recursiveEqualFunc(rslt, a, b, x, y, old) {
 
 function morganAndString(a, b) {
    let res = "";
-   let working = true;
    for (let x = 0, y = 0, i = 0; x < a.length || y < b.length;) {
       if (x < a.length && y < b.length) {
          if (a.charCodeAt(x) < b.charCodeAt(y)) {
@@ -79,7 +85,7 @@ function morganAndString(a, b) {
             res += b.charAt(y)
             y++;
          } else if (a.charCodeAt(x) === b.charCodeAt(y)) {
-            let req = recursiveEqualFunc("", a, b, x, y, "", 0);
+            let req = recursiveEqualFunc("", a, b, x, y, "");
             res += req.rslt;
             x = req.x;
             y = req.y;
@@ -95,4 +101,3 @@ function morganAndString(a, b) {
    }
    return res;
 }
-
